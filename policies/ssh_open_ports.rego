@@ -1,27 +1,10 @@
 package terraform.ec2
 
-test_deny_when_port_80_open_to_world {
-    deny[_] with input as {
-        "resource_changes": [
-            {
-                "type": "aws_security_group",
-                "change": {"after": {"ingress": [
-                    {"from_port": 80, "cidr_blocks": ["0.0.0.0/0"]}
-                ]}}
-            }
-        ]
-    }
-}
-
-test_allow_when_only_ssh_open_to_world {
-    count(deny) == 0 with input as {
-        "resource_changes": [
-            {
-                "type": "aws_security_group",
-                "change": {"after": {"ingress": [
-                    {"from_port": 22, "cidr_blocks": ["0.0.0.0/0"]}
-                ]}}
-            }
-        ]
-    }
+deny contains msg if {
+  resource := input.resource_changes[_]
+  resource.type == "aws_security_group"
+  rule := resource.change.after.ingress[_]
+  rule.from_port != 22
+  rule.cidr_blocks[_] == "0.0.0.0/0"
+  msg := sprintf("Puerto %d abierto a 0.0.0.0/0, solo el 22 esta permitido para Learner Lab", [rule.from_port])
 }

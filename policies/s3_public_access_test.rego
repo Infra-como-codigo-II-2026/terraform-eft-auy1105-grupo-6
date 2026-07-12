@@ -1,6 +1,6 @@
 package terraform.s3
 
-test_deny_when_public_acls_allowed {
+test_deny_when_public_acls_allowed if {
     deny["El bucket S3 no puede tener block_public_acls en false"] with input as {
         "resource_changes": [
             {
@@ -11,7 +11,7 @@ test_deny_when_public_acls_allowed {
     }
 }
 
-test_allow_when_public_acls_blocked {
+test_allow_when_public_acls_blocked if {
     count(deny) == 0 with input as {
         "resource_changes": [
             {
