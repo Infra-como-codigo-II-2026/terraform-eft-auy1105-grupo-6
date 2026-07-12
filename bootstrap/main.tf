@@ -11,7 +11,7 @@ provider "aws" {
 
 module "state_bucket" {
   source  = "Infra-como-codigo-II-2026/s3-auy1105-grupo-6/aws"
-  version = "~> 1.1.1"
+  version = "~> 1.1.2"
 
   project            = "auy1105"
   environment        = "prod"
