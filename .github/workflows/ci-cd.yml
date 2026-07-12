@@ -1,0 +1,41 @@
+name: CI/CD EFT
+
+on: [pull_request, push]
+
+jobs:
+  call-terraform-checks:
+    name: Terraform Checks
+    uses: ./.github/workflows/terraform.yml
+    with:
+      path: .
+
+  call-checkov:
+    name: Checkov Security Analysis
+    uses: ./.github/workflows/checkov.yml
+    with:
+      path: .
+
+  policy-tests:
+    name: OPA Policy Tests
+    needs: [call-terraform-checks, call-checkov]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa
+          sudo mv opa /usr/local/bin/
+      - name: Run policy unit tests
+        run: opa test policies/ -v
+
+  apply:
+    name: Terraform Apply
+    needs: [call-terraform-checks, call-checkov, policy-tests]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init
+      - run: terraform apply -auto-approve

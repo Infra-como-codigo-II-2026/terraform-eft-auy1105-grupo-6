@@ -1,0 +1,5 @@
+project     = "auy1105"
+environment = "prod"
+key_name    = "vockey"
+vpc_cidr    = "10.0.0.0/16"
+# ami       = ""  # dejar vacio para autodeteccion, o especificar un ID puntual
